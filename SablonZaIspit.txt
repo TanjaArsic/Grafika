@@ -1,0 +1,113 @@
+METAFAJLOVI
+			ucita se slika u konstruktoru
+			ako je metafajl onda preko HENHMETAFILE fajl = GetEnhMetaFile(CString("ime"));
+
+
+			GetEnhMetaFileHeader(fork, sizeof(ENHMETAHEADER), &forkRect);
+			CRect rc2 = CRect(0, 0, abs(forkRect.rclBounds.right - forkRect.rclBounds.left),
+						abs(forkRect.rclBounds.top - forkRect.rclBounds.bottom));
+
+			pDC->PlayMetaFile(fork, rc2);
+
+
+
+BITMAPE
+			DImage* img = new DImage();
+			img->Load(CString("ime"));
+
+
+memorijski device context kako se kreira, kreira se bitmapa koja ce da bude iste velicine kao klijentski prozor
+
+-----------------------------------
+CRect clientWindow;
+GetClientRect(&clientWindow);
+CDC* memDC = new CDC();
+memDC->CreateCompatibleDC(pDC);
+CBitmap b;
+b.CreateCompatibleBitmap(pDC, clientWindow.Width(), clientWindow.Height());
+memDC->SelectObject(&b);
+
+XFORM oldForm;
+memDC->SetGraphicsMode(GM_ADVANCED);
+memDC->GetWorldTransform(&oldForm);
+
+//....//
+
+memDC->SetWorldTransform(&oldForm);
+pDC->BitBlt(0,0,k.Width(),k.Height(),memDC,0,0,SRCCOPY);
+memDC->DeleteDC();
+
+-------------------------------------
+
+
+void Translate(CDC* pDC, float dX, int dY, bool rightMultiply)
+{
+	XFORM mat = {1,0,0,1,dX,dY};
+	pDC->ModifyWorldTransform(&mat, rightMultiply? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+
+void Scale(CDC* pDC, float sX, float sY, bool rightMultiply)
+{
+	XFORM mat = { sX, 0, 0, sY, 0, 0 };
+	pDC->ModifyWorldTransform(&mat, rightMultiply? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+
+void Rotate(CDC* pDC, float angle, bool rightMultiply)
+{
+	XFORM mat = { cos(ToRad(angle)), sin(ToRad(angle)), -sin(ToRad(angle)), cos(ToRad(angle)),0,0};
+	pDC->ModifyWorldTransform(&mat, rightMultiply? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+
+void Mirror(CDC* pDC, bool mx, bool my, bool rightMultiply)
+{
+	XFORM mat = { mx?-1:1, 0, 0, my?-1:1, 0, 0 };
+	pDC->ModifyWorldTransform(&mat, rightMultiply? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
+}
+
+
+----------------------------------------
+
+
+DRAW TRANSPARENT
+
+
+void DrawImgTransparent(CDC* pDC, DImage* pImage, CRect srcRc, CRect dstRc)
+{
+	int w = pImage->Width();int h = pImage->Height();
+	CBitmap* bmpImage = new CBitmap();
+	bmpImage->CreateCompatibleBitmap(pDC, w, h);
+
+	CBitmap* bmpMask = new CBitmap();
+	bmpMask->CreateBitmap(w, h, 1, 1, NULL);
+
+	BITMAP* bm = new BITMAP();
+	bmpImage->GetBitmap(bm);
+
+	CDC* srcDC = new CDC();
+	srcDC->CreateCompatibleDC(pDC);
+
+	CDC* dstDC = new CDC();
+	dstDC->CreateCompatibleDC(pDC);
+
+	CBitmap* pOldSrcBmp = srcDC->SelectObject(bmpImage);
+	CBitmap* pOldDstBmp = dstDC->SelectObject(bmpMask);
+
+	pImage->Draw(srcDC, srcRc, dstRc);
+
+	COLORREF clrTopLeft = srcDC->GetPixel(0, 0);
+	COLORREF clrSaveBk = srcDC->SetBkColor(clrTopLeft);
+	COLORREF clrSaveDstText = srcDC->SetTextColor(RGB(255, 255, 255));
+
+	dstDC->BitBlt(0, 0, bm->bmWidth, bm->bmHeight, srcDC, 0, 0, SRCCOPY);
+	srcDC->SetBkColor(RGB(0, 0, 0));
+	srcDC->BitBlt(0, 0, bm->bmWidth, bm->bmHeight, dstDC, 0, 0, SRCAND);
+
+	pDC->BitBlt(0, 0, bm->bmWidth, bm->bmHeight, dstDC, 0, 0, SRCAND);
+	pDC->BitBlt(0, 0, bm->bmWidth, bm->bmHeight, srcDC, 0, 0, SRCPAINT);
+
+	*dealokacija*
+
+}
