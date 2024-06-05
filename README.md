@@ -1,5 +1,1 @@
-![0](https://github.com/TanjaArsic/Grafika/assets/101667629/8e86de37-fc4b-46c9-9666-70072a712e58)
-![1](https://github.com/TanjaArsic/Grafika/assets/101667629/ecbe8ecf-525c-4027-8199-1b545f3bf0fd)
-![5](https://github.com/TanjaArsic/Grafika/assets/101667629/4a266a35-9817-4295-8976-3bfa008b9eef)
-![0](https://github.com/TanjaArsic/Grafika/assets/101667629/48e3a595-2f39-43d9-9293-73444613f778)
-![2](https://github.com/TanjaArsic/Grafika/assets/101667629/7f54ae9a-0fe8-4d56-928a-90e88f3fae3c)
+
